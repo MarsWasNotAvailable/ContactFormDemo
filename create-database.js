@@ -15,7 +15,7 @@ process.on('message', function(Message) {
 			if (err) { console.log(err); }
 			else
 			{
-				console.log("Connected!");
+				//console.log("Connected!");
 				
 				const QueryCreateDatabase = fs.readFileSync('./CreateDatabase.sql', 'utf8');
 

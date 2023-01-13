@@ -19,7 +19,7 @@ process.on('message', function(Message) {
 			}
 			else
 			{
-				console.log("Connected!");
+				//console.log("Connected!");
 				
 				//"SHOW DATABASES;"
 

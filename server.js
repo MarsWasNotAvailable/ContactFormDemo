@@ -35,15 +35,8 @@ console.log("Current Working Directory: ", process.cwd());
 
 var server = http.createServer(function (Request, Response) {
 	
-	//thinking, maybe the GET should send JSON - while the POST simply INSERT new data
-	//https://codeforgeek.com/nodejs-mysql-tutorial/
-	//https://www.w3schools.com/nodejs/nodejs_mysql_insert.asp
-	//>>why dont you make GET generate the JSON and insert it inside the Response ?
-	//  do you want one or two local server (different port) ?
-	
 	try
 	{
-		
 		Request.rawBody = '';
 		Request.on('data', function( chunk ) {
 			Request.rawBody += chunk;
@@ -94,8 +87,6 @@ var server = http.createServer(function (Request, Response) {
 		}
 		else if (Request.method === "POST")
 		{
-			console.log("we're posting");
-			
 			Request.on('end', function() {
 
 				//Request.body = "";
@@ -107,7 +98,7 @@ var server = http.createServer(function (Request, Response) {
 					{
 						Request.body = JSON.parse((Request.rawBody));
 						
-						console.log("Request.body: ", Request.body);
+						//console.log("Request.body: ", Request.body);
 					}
 					else if (Request.rawBody.indexOf('&') > -1) //QueryString
 					{
@@ -118,7 +109,7 @@ var server = http.createServer(function (Request, Response) {
 
 					if (Request.body.Intent)
 					{	
-						console.log("Intent: ", Request.body.Intent);
+						//console.log("Intent: ", Request.body.Intent);
 						
 						let ProcessUpdateRecord = childprocess.fork(process.cwd() + '/update-record.js');
 						

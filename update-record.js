@@ -15,7 +15,7 @@ process.on('message', function(Message) {
 			if (err) { console.log(err); }
 			else
 			{
-				console.log("Connected!");
+				//console.log("Connected!");
 				
 				if (Arguments.ContactInfo.Intent === "Register")
 				{
@@ -35,26 +35,31 @@ process.on('message', function(Message) {
 						else{
 							//console.log("INSERT QUERY Results: ", ResultsArray);
 						}
+						
+						process.exit();
 					});
 				}
 				else if (Arguments.ContactInfo.Intent === "Update")
 				{
+					//console.log("Updating!");
+					
+					const ValuesToInsert = [
+						Arguments.ContactInfo.Postcode,
+						Arguments.ContactInfo.Mail
+						];
+					
 					//Update existing record
 					var QueryString = "UPDATE Contact SET Postcode = ? WHERE Mail = ?";
-					MyConnection.query(QueryString, [Arguments.ContactInfo.Postcode, Arguments.ContactInfo.Mail], function (err, ResultsArray) { });
-				}
-
-				//gaa_db
-				// MyConnection.query("SELECT * FROM Contact", function (err, result) {
-					// if (err) { console.log(err); }
-					// else{
-						// console.log("DB Results: ", result);
-					// }
+					MyConnection.query(QueryString, ValuesToInsert, function (err, ResultsArray) { 
+						
+						if (err) { console.log(err); }
+						else{
+							//console.log("INSERT QUERY Results: ", ResultsArray);
+						}
 					
-					// process.exit();
-				// });
-				
-				process.exit();
+						process.exit();
+					});
+				}
 			}
 		}
 	);
