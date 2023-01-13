@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link type="text/css" rel="stylesheet" href="./style.css" >
+
+    <title>GAA Demo: Administration</title>
+<body>
+
+	<div id="container" class="flex"></div>
+	
+	<table id="ContactTable">
+	<tr>
+		<th>Mail</th>
+		<th>Prénom</th>
+		<th>Nom De Famille</th>
+		<th>Date d'ajout</th>
+		<th>Code Postale</th>
+		<th>Address IP</th>
+	</tr>
+	<tr>
+		<td name="UserMail">admin@localhost</td>
+		<td>admin</td>
+		<td>admin</td>
+		<td>20230101</td>
+		<td contenteditable oninput="Validate(this)" tabindex="0" >97400</td>
+		<!-- <td><input type="text" value="97400" name="Postcode" pattern="\d*" required/></td> -->
+		<td>localhost</td>
+	</tr>
+	</table> 
+	
+<script>
+	function Validate(Element)
+	{
+		if (Element.onblur == null)
+		{
+			Element.onblur = function () {
+
+				if ( Element.innerHTML.match(new RegExp(/\d{5}/g)) )
+				{
+					const NewPostcode = Element.innerHTML;
+					const ForThisMail = Element.parentElement.firstElementChild.innerHTML;
+
+					try
+					{
+						const url = new URL( location.origin + "/update" );
+						
+						var UpdateData = {
+							Mail : ForThisMail,
+							Postcode : NewPostcode,
+							Intent : "Update"
+						};
+
+						let Options = {
+							method: 'POST',
+							headers: { 'Content-Type': 'application/json' },
+							body: (JSON.stringify(UpdateData))
+						};
+
+						//will send a query to MySQL to update the record
+						fetch( url, Options )
+						.then((Response) => Response.json())
+						.then( (JSON) => console.log(JSON) )
+						;
+					}
+					catch (err)
+					{
+						console.error('Caught error: ', err);
+					}
+					
+					Element.onblur = null;
+				}
+				else
+				{
+					//Element.focus(); //doesnt work on it's own, see below
+					setTimeout(function() { Element.focus(); }, 0);
+					
+					alert("Mauvais code postale. Reessayer.");
+				}
+			};
+		}
+	}
+	
+	function PopulateTable(JsonData)
+	{
+		let ContactTable = document.getElementById("ContactTable");
+		
+		JsonData.forEach((EachRecord) => {
+			let Row = document.createElement('tr');
+			ContactTable.appendChild(Row);
+
+			for (const EachField in EachRecord)
+			{
+				var NewField = document.createElement('td');
+				NewField.innerHTML = EachRecord[EachField];
+				Row.appendChild(NewField);
+				
+				if (EachField === "Postcode")
+				{
+					console.log("setting attributes for: ", EachField);
+					
+					//contenteditable oninput="Validate(this)" tabindex="0";
+					NewField.setAttribute("contenteditable", true);
+					NewField.setAttribute("oninput", "Validate(this)");
+					NewField.setAttribute("tabindex", 0);
+				}
+			}	
+		});
+	}
+	
+	window.onload = function(){
+	
+		try
+		{
+			const url = new URL( location.origin + "/retrieve" );
+			
+			//'application/json;charset=utf-8'
+			let Options = {
+				method: 'GET',
+				headers: { 'Content-Type': 'application/json' },
+			};
+
+			fetch( url, Options )
+			.then((Response) => Response.json())
+			.then( (JSON) => PopulateTable(JSON) )
+			;
+		}
+		catch (err)
+		{
+			console.error('Caught error: ', err);
+		}
+	}
+
+</script>
+
+</body>
+</html>
