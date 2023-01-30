@@ -1,5 +1,7 @@
 <!DOCTYPE html>
 <html>
+<!-- This is the original document I was using before I "switched" to React -->
+
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <link type="text/css" rel="stylesheet" href="./style.css" >
 
@@ -14,10 +16,11 @@
 		<th>Prénom</th>
 		<th>Nom De Famille</th>
 		<th>Date d'ajout</th>
-		<th>Code Postale</th>
+		<th onClick="">Code Postale</th>
 		<th>Address IP</th>
 	</tr>
-<!-- 	<tr>
+<!--
+	<tr>
 		<td name="UserMail">admin@localhost</td>
 		<td>admin</td>
 		<td>admin</td>
@@ -75,15 +78,42 @@
 					//Element.focus(); //doesnt work on it's own, see below
 					setTimeout(function() { Element.focus(); }, 0);
 					
-					alert("Mauvais code postale. Reessayer.");
+					alert("Mauvais code postale. Réessayer.");
 				}
 			};
 		}
 	}
 	
-	function PopulateTable(JsonData)
+	function PopulateTable(JsonData, SortParameter)
 	{
 		let ContactTable = document.getElementById("ContactTable");
+		
+		JsonData.sort((Left, Right)=>{
+			let Factor = Number(Left.DateAdded > Right.DateAdded);
+			switch(SortParameter)
+			{
+				case 'IP':
+					Factor += Number(Left.IP > Right.IP);
+					break;
+				case 'Mail':
+					Factor += Number(Left.Mail > Right.Mail);
+					break;
+				case 'NameFirst':
+					Factor += Number(Left.NameFirst > Right.NameFirst);
+					break;
+				case 'NameLast':
+					Factor += Number(Left.NameLast > Right.NameLast);
+					break;
+				case 'Postcode':
+					Factor += Number(Left.Postcode > Right.Postcode);
+					break;
+				default:
+					break;
+			}
+			return Factor;
+		});
+		
+		console.log(JsonData);
 		
 		JsonData.forEach((EachRecord) => {
 			let Row = document.createElement('tr');
@@ -122,7 +152,8 @@
 
 			fetch( url, Options )
 			.then((Response) => Response.json())
-			.then( (JSON) => PopulateTable(JSON) )
+			//.then( (JSON) => PopulateTable(JSON, "Date") )
+			.then( (JSON) => PopulateTable(JSON, "NameFirst") )
 			;
 		}
 		catch (err)

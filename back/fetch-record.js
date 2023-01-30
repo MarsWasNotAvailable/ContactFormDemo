@@ -1,6 +1,5 @@
 var mysql = require('mysql');
 var fs = require('fs');
-//var childprocess = require('child_process');
 
 process.on('message', function(Message) {
 
@@ -21,11 +20,18 @@ process.on('message', function(Message) {
 			{
 				//console.log("Connected!");
 				
-				//"SHOW DATABASES;"
-
 				MyConnection.query("SELECT * FROM gaa_db.Contact;", function (err, result) {
 					if (err) { console.log(err); }
 					else{
+						const Privacy = true;
+						
+						if (Privacy)
+						{
+							result.forEach((Each)=>{
+								Each.IP = "Private";
+							});
+						}
+						
 						process.send({ FetchedRecords : result });
 						
 						//console.log("fetched: ", result);

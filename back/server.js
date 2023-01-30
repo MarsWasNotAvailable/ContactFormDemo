@@ -1,11 +1,13 @@
-var http = require('http');
-var fs = require('fs');
-var url = require('url');
-var path = require('path');
-var ip = require('ip');	//remove -g
-var querystring = require('querystring');
 var childprocess = require('child_process');
-//Express could simplify below
+var fs = require('fs');
+var path = require('path');
+var http = require('http');
+var url = require('url');
+var querystring = require('querystring');
+//var ip = require('ip');	//remove -g
+//express package could simplify below
+
+const SQLConnectionInfo = require('./database-login.json');
 
 const MimeContentType = {
 	"html": "text/html;charset=utf-8",
@@ -13,25 +15,15 @@ const MimeContentType = {
 	"jpeg": "image/jpeg",
 	"jpg": "image/jpeg",
 	"png": "image/png",
-	"js": "text/javascript;charset=utf-8",
+	"js": "text/javascript",
 	"json" : "application/json;charset=utf-8",
-	"css": "text/css"
+	"css": "text/css",
+	"txt": "text/plain"
 };
 
-const SQLConnectionInfo ={
-	  host: "localhost",
-	  port: 2111,
-	  user: "dev",
-	  password: "dev",
-	  database: "gaa_db",
-	  multipleStatements: true
-	};
-
-let ProcessCreateDatabase = childprocess.fork(process.cwd() + '/create-database.js');
-ProcessCreateDatabase.send({SQLLogin : SQLConnectionInfo});
-//TODO: check if Database successfully was created - otherwise no need to run below
-
-console.log("Current Working Directory: ", process.cwd());
+//console.log("Server Current Working Directory: ", process.cwd());
+const DirectoryBackEnd = process.cwd() + "/back";
+const DirectoryFrontEnd = process.cwd() + "/front";
 
 var server = http.createServer(function (Request, Response) {
 	
@@ -44,27 +36,25 @@ var server = http.createServer(function (Request, Response) {
 		
 		//A local path
 		const RequestedURL = url.parse(Request.url, true);
-
+		
 		var RequestedPage = RequestedURL.pathname;
 		if (RequestedPage === '/')
 		{
 			RequestedPage = "/index.html";
-		}	
-		
-		const ContentType = [path.extname(RequestedPage).split(".")[1]];
-		RequestedPage = path.join(process.cwd(), RequestedPage);
+		}
+
+		const ContentType = MimeContentType[path.extname(RequestedPage).split(".")[1]];
+		RequestedPage = path.join(DirectoryFrontEnd, RequestedPage);
 		
 		if (Request.method === "GET")
 		{
 			if (RequestedURL.pathname === "/retrieve")
 			{
-				let ProcessCreateDatabase = childprocess.fork(process.cwd() + '/fetch-record.js');
-				ProcessCreateDatabase.send({SQLLogin : SQLConnectionInfo});
+				let ProcessAccessDatabase = childprocess.fork(DirectoryBackEnd + '/fetch-record.js');
+				ProcessAccessDatabase.send({SQLLogin : SQLConnectionInfo});
 				
-				ProcessCreateDatabase.on('message', function(Message) {
+				ProcessAccessDatabase.on('message', function(Message) {
 					
-					//console.log("Server Fetched: ", Message);
-				
 					Response.writeHead(200, { 'Content-Type': 'application/json' });
 					Response.write( JSON.stringify( Message.FetchedRecords ) );
 					Response.end();
@@ -89,29 +79,78 @@ var server = http.createServer(function (Request, Response) {
 		{
 			Request.on('end', function() {
 
-				//Request.body = "";
 				if ( Request.rawBody )
 				{
-					console.log( "raw body:", Request.rawBody);
+					const RequestedContentType = Request.headers['content-type'];
+					console.log("Requested ContentType: ", RequestedContentType);
 
-					if (Request.rawBody.indexOf('{') > -1) //JSON
+					if (RequestedContentType === 'application/json'
+						&& (Request.rawBody.indexOf('{') > -1))
 					{
 						Request.body = JSON.parse((Request.rawBody));
-						
-						//console.log("Request.body: ", Request.body);
 					}
-					else if (Request.rawBody.indexOf('&') > -1) //QueryString
+					else if (RequestedContentType === 'application/x-www-form-urlencoded' //QueryString
+								&& (Request.rawBody.indexOf('&') > -1))
 					{
 						var Query = querystring.parse(Request.rawBody);
 						
 						Request.body = JSON.parse(JSON.stringify(Query));
 					}
-
-					if (Request.body.Intent)
-					{	
-						//console.log("Intent: ", Request.body.Intent);
+					else if (RequestedContentType === 'multipart/form-data')
+					{
+						//multipart form data is composed like this:
+						//[boundary]		-> '-----------------------------19456774526114129871508375949"
+						//[content key]		-> 'Content-Disposition: form-data; name="NameLast"'
+						//[content value]	-> 'value'
 						
-						let ProcessUpdateRecord = childprocess.fork(process.cwd() + '/update-record.js');
+						let DataFields = Request.rawBody.split(/[\r\n]*^(?:-+\d+-*)$[\r\n]*/gm);
+
+						let Pairs = [];
+						let Attachements = [];
+
+						DataFields.forEach((FieldText) => {
+
+							if (FieldText) //skip empty lines
+							{
+								//some got a Content-Type like: plain/text, application/octet-stream or application/whatever-composed-name
+								if ((FieldText.search(/Content-Type: \w+\/\w+(-\w+)*/m) > -1))
+								{
+									let NewAttachement = {};
+									
+									NewAttachement.Filename = FieldText.match(/(?<=(filename=")).*(?=";?[\r\n]+.*$)/m)[0] || "";
+									if (NewAttachement.Filename !== '')
+									{
+										NewAttachement.Data = FieldText.split(/Content-Type: \w+\/\w+(-\w+)*([\r\n]+)/m).pop() || "";
+
+										Attachements.push(NewAttachement);
+									}
+								}
+								else
+								{
+									let Pair = FieldText.match(/(?<=(name=")).*";?.*$([\r\n]+.*)+/m)[0] || "";							
+
+									Pairs.push((Pair.split(/"[\r\n]+/)));
+								}
+							}
+						});
+
+						Request.body = Object.fromEntries(new Map(Pairs));
+						Request.body.Attachements = Attachements;
+						
+						console.log("Request Body: ", Request.body);
+					}
+					else
+					{
+						Response.writeHead(200, { 'Content-Type': MimeContentType['txt'] });
+						Response.write( "Requested Content-Type unsupported" );
+						Response.end();
+						
+						return;
+					}
+					
+					if (Request.body.Intent)
+					{
+						let ProcessUpdateRecord = childprocess.fork(DirectoryBackEnd + '/update-record.js');
 						
 						if (Request.body.Intent === "Register")
 						{	
@@ -158,9 +197,10 @@ var server = http.createServer(function (Request, Response) {
 	{
 		console.error(e);
 	}
-
 });
 
 server.listen(3000);
 
 console.log(server.address());
+
+process.exitCode = 0;

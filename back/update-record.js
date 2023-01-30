@@ -54,7 +54,7 @@ process.on('message', function(Message) {
 						
 						if (err) { console.log(err); }
 						else{
-							//console.log("INSERT QUERY Results: ", ResultsArray);
+							//console.log("Update Query Results: ", ResultsArray);
 						}
 					
 						process.exit();

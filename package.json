@@ -1,0 +1,26 @@
+{
+  "name": "contactformdemo",
+  "version": "0.0.2",
+  "description": "To receive message from a client",
+  "main": "main.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "powershell ./start-dev.ps1",
+    "start": "node main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MarsWasNotAvailable/ContactFormDemo.git"
+  },
+  "author": "Emme",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MarsWasNotAvailable/ContactFormDemo/issues"
+  },
+  "homepage": "https://github.com/MarsWasNotAvailable/ContactFormDemo#readme",
+  "dependencies": {
+    "mysql": "^2.18.1"
+  }
+}
