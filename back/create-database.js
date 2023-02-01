@@ -17,10 +17,11 @@ MyConnection.connect(
 		{
 			//console.log("Connected!");
 			
-			const QueryCreateDatabaseDefault = fs.readFileSync('back/CreateDatabase.sql', 'utf8');
-			
-			let QueryCreateDatabase = QueryCreateDatabaseDefault.replaceAll('`marsdemo_default_db`', `\`${SQLConnectionInfo.database}\``).toString();
+			//const QueryCreateDatabaseDefault = fs.readFileSync('back/CreateDatabase.sql', 'utf8');
+			//let QueryCreateDatabase = QueryCreateDatabaseDefault.replaceAll('`marsdemo_default_db`', `\`${SQLConnectionInfo.database}\``).toString();
 
+			const QueryCreateDatabase = fs.readFileSync('back/CreateDatabase.sql', 'utf8');
+			
 			MyConnection.query(QueryCreateDatabase, function (err, ResultsArray) {
 				
 				if (err)
