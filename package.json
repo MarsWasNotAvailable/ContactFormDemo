@@ -19,8 +19,5 @@
   "bugs": {
     "url": "https://github.com/MarsWasNotAvailable/ContactFormDemo/issues"
   },
-  "homepage": "https://github.com/MarsWasNotAvailable/ContactFormDemo#readme",
-  "dependencies": {
-    "mysql": "^2.18.1"
-  }
+  "homepage": "https://github.com/MarsWasNotAvailable/ContactFormDemo#readme"
 }
