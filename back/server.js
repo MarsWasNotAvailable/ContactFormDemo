@@ -199,7 +199,7 @@ var server = http.createServer(function (Request, Response) {
 	}
 });
 
-server.listen(3000);
+server.listen((process.env.PORT || 3000));
 
 console.log(server.address());
 

@@ -3,6 +3,6 @@
 	"port":					3306,
 	"user":					"root",
 	"password":				"root",
-	"database":				"gaa_db",
+	"database":				"marsdemo_gaa_db",
 	"multipleStatements":	true
 }

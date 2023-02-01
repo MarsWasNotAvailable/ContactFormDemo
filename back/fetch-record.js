@@ -20,7 +20,10 @@ process.on('message', function(Message) {
 			{
 				//console.log("Connected!");
 				
-				MyConnection.query("SELECT * FROM gaa_db.Contact;", function (err, result) {
+				//let Query = "SELECT * FROM <?>.Contact;";
+				//Query.replace("<?>", (Arguments.DatabaseSetting).database);
+				
+				MyConnection.query("SELECT * FROM Contact;", function (err, result) {
 					if (err) { console.log(err); }
 					else{
 						const Privacy = true;

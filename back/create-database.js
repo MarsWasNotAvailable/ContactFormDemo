@@ -2,20 +2,12 @@ var mysql = require('mysql');
 var fs = require('fs');
 const SQLConnectionInfo = require('./database-login.json');
 
-//process.stdin.pipe(process.stdout);
-//process.on('message', function(Message) {
-//});
-
-var Arguments = {
-	DatabaseSetting: SQLConnectionInfo//,
-	//ContactInfo: Message.ContactInfo
-};
-
 //We cannot ask to connect to something we may have to create.
-Arguments.DatabaseSetting.database = null;
-//delete Arguments.DatabaseSetting.database;
+let FirstConnection = SQLConnectionInfo;
+//FirstConnection.database = null;
+delete FirstConnection.database;
 
-var MyConnection = mysql.createConnection(Arguments.DatabaseSetting);
+var MyConnection = mysql.createConnection(FirstConnection);
 
 MyConnection.connect(
 	function(err) {
@@ -24,7 +16,9 @@ MyConnection.connect(
 		{
 			//console.log("Connected!");
 			
-			const QueryCreateDatabase = fs.readFileSync('back/CreateDatabase.sql', 'utf8');
+			const QueryCreateDatabaseDefault = fs.readFileSync('back/CreateDatabase.sql', 'utf8');
+			
+			let QueryCreateDatabase = QueryCreateDatabaseDefault.replaceAll('`marsdemo_default_db`', `\`${SQLConnectionInfo.database}\``);
 
 			MyConnection.query(QueryCreateDatabase, function (err, ResultsArray) {
 				

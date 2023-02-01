@@ -26,7 +26,7 @@ Setup
 >   **back/database-login.json**
 
 >   This whole web app is handled by **NodeJS** (a choice):  
->   `npm install -g http-server http, mysql, url, path, querystring`.  
+>   `npm install http-server http, mysql, url, path, querystring`.  
 >   Dont forget nodejs has to be in the PATH: can add "/AppData/Roaming/npm"  
 >   **To run the server, one can call:**  
 >   `npm start` **or** `node main.js`
