@@ -19,7 +19,7 @@ MyConnection.connect(
 			
 			const QueryCreateDatabaseDefault = fs.readFileSync('back/CreateDatabase.sql', 'utf8');
 			
-			let QueryCreateDatabase = QueryCreateDatabaseDefault.replaceAll('`marsdemo_default_db`', `\`${SQLConnectionInfo.database}\``);
+			let QueryCreateDatabase = QueryCreateDatabaseDefault.replaceAll('`marsdemo_default_db`', `\`${SQLConnectionInfo.database}\``).toString();
 
 			MyConnection.query(QueryCreateDatabase, function (err, ResultsArray) {
 				
