@@ -1,6 +1,7 @@
 var mysql = require('mysql');
 var fs = require('fs');
-const SQLConnectionInfo = require('./database-login.json');
+//const SQLConnectionInfo = require('./database-login.json');
+const SQLConnectionInfo = require('/etc/secrets/database-login.json');
 
 //We cannot ask to connect to something we may have to create.
 let FirstConnection = SQLConnectionInfo;

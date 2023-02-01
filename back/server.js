@@ -7,7 +7,8 @@ var querystring = require('querystring');
 //var ip = require('ip');	//remove -g
 //express package could simplify below
 
-const SQLConnectionInfo = require('./database-login.json');
+//const SQLConnectionInfo = require('./database-login.json');
+const SQLConnectionInfo = require('/etc/secrets/database-login.json');
 
 const MimeContentType = {
 	"html": "text/html;charset=utf-8",
